@@ -1,0 +1,1 @@
+print("Hello, AI PR Review Tool is running!")
