@@ -1,4 +1,5 @@
 import os
+import sys
 import requests
 from dotenv import load_dotenv
 from openai import OpenAI
@@ -6,34 +7,51 @@ from openai import OpenAI
 # 加载 .env 文件里隐藏的密码
 load_dotenv()
 
-def get_pr_diff(pr_url: str):
-    # 转换 API 链接
-    api_url = (
-        pr_url.strip()
-        .replace("https://github.com/", "https://api.github.com/repos/", 1)
-        .replace("/pull/", "/pulls/", 1)
-    )
 
-    # 组装请求头，安全读取 Token
+def get_pr_diff(repo: str, pr_number: str):
+    api_url = f"https://api.github.com/repos/{repo}/pulls/{pr_number}"
+
     headers = {
         "Accept": "application/vnd.github.v3.diff",
         "User-Agent": "ai-pr-review-tool",
-        "Authorization": f"Bearer {os.getenv('GITHUB_TOKEN')}"
+        "Authorization": f"Bearer {os.getenv('GITHUB_TOKEN')}",
     }
 
-    # 发送请求
     try:
         resp = requests.get(api_url, headers=headers, timeout=30)
     except requests.RequestException as e:
-        print(f"Request failed: {e}")
+        print(f"获取 Diff 失败: {e}")
         return None
 
-    # 返回结果
     if resp.status_code == 200:
         return resp.text
 
-    print(f"Request failed: {resp.status_code} {resp.reason}")
+    print(f"获取 Diff 失败: {resp.status_code} {resp.reason}")
     return None
+
+
+def post_comment_to_pr(repo: str, pr_number: str, comment: str):
+    api_url = f"https://api.github.com/repos/{repo}/issues/{pr_number}/comments"
+
+    headers = {
+        "Accept": "application/vnd.github+json",
+        "User-Agent": "ai-pr-review-tool",
+        "Authorization": f"Bearer {os.getenv('GITHUB_TOKEN')}",
+    }
+
+    payload = {"body": comment}
+
+    try:
+        resp = requests.post(api_url, headers=headers, json=payload, timeout=30)
+    except requests.RequestException as e:
+        print(f"发送评论失败: {e}")
+        return False
+
+    if resp.status_code in (200, 201):
+        return True
+
+    print(f"发送评论失败: {resp.status_code} {resp.reason} {resp.text}")
+    return False
 
 
 def analyze_code_diff(diff_text: str) -> str:
@@ -61,8 +79,34 @@ def analyze_code_diff(diff_text: str) -> str:
         return ""
 
 
-# 测试运行
-diff_text = get_pr_diff("https://github.com/Galaxy-cloud-andy/ai-pr-review-tool/pull/1")
-if diff_text:
-    review_result = analyze_code_diff(diff_text)
-    print(review_result)
+print("开始读取 GitHub Actions 环境变量...")
+repo = os.getenv("GITHUB_REPOSITORY")
+pr_number = os.getenv("PR_NUMBER")
+
+if not repo or not pr_number:
+    print("缺少必要环境变量 GITHUB_REPOSITORY 或 PR_NUMBER，程序退出。")
+    sys.exit(1)
+
+print("开始获取 Diff...")
+diff_text = get_pr_diff(repo, pr_number)
+if not diff_text:
+    print("未获取到 Diff，程序退出。")
+    sys.exit(1)
+
+max_diff_length = 20000
+if len(diff_text) > max_diff_length:
+    print(f"Diff 过长，已截断到 {max_diff_length} 字符以防超载。")
+    diff_text = diff_text[:max_diff_length]
+
+print("Diff 获取完成，开始 AI 分析...")
+review_result = analyze_code_diff(diff_text)
+if not review_result:
+    print("AI 分析失败，程序退出。")
+    sys.exit(1)
+
+print("AI 分析完成，正在发送评论...")
+if post_comment_to_pr(repo, pr_number, review_result):
+    print("评论发送成功。")
+else:
+    print("评论发送失败。")
+    sys.exit(1)
