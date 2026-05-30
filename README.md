@@ -1,5 +1,4 @@
-ai-pr-review-tool
-🤖 AI PR Review 助手
+#🤖 AI PR Review 助手
 
 > 体验方式一（最快）： 请直接点击仓库上方的 `Pull requests` 标签，查看名为 **`[Demo] 体验与效果展示专用 PR`** 的记录，即可直接观看机器人自动生成的 Review 报告。
 > 体验方式二： 可以直接 Fork 本仓库并提交一个 PR，机器人将在 1 分钟内自动在评论区回复审查结果。
