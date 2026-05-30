@@ -1,6 +1,7 @@
 import os
 import requests
 from dotenv import load_dotenv
+from openai import OpenAI
 
 # 加载 .env 文件里隐藏的密码
 load_dotenv()
@@ -34,6 +35,34 @@ def get_pr_diff(pr_url: str):
     print(f"Request failed: {resp.status_code} {resp.reason}")
     return None
 
+
+def analyze_code_diff(diff_text: str) -> str:
+    client = OpenAI(
+        api_key=os.getenv("OPENAI_API_KEY"),
+        base_url="https://api.deepseek.com",
+    )
+    try:
+        response = client.chat.completions.create(
+            model="deepseek-chat",
+            messages=[
+                {
+                    "role": "system",
+                    "content": (
+                        "你是一个资深的代码审查专家。请用中文对下面这段 Git Diff 代码变更进行 Review，"
+                        "指出代码的优点，并提出潜在的问题或修改建议，保持专业且简明扼要。"
+                    ),
+                },
+                {"role": "user", "content": diff_text},
+            ],
+        )
+        return response.choices[0].message.content
+    except Exception as e:
+        print(f"AI review failed: {e}")
+        return ""
+
+
 # 测试运行
 diff_text = get_pr_diff("https://github.com/Galaxy-cloud-andy/ai-pr-review-tool/pull/1")
-print(diff_text)
+if diff_text:
+    review_result = analyze_code_diff(diff_text)
+    print(review_result)
