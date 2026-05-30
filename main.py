@@ -110,3 +110,4 @@ if post_comment_to_pr(repo, pr_number, review_result):
 else:
     print("评论发送失败。")
     sys.exit(1)
+# 测试一下我的全自动 AI 机器人管家是否上班
