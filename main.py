@@ -66,8 +66,14 @@ def analyze_code_diff(diff_text: str) -> str:
                 {
                     "role": "system",
                     "content": (
-                        "你是一个资深的代码审查专家。请用中文对下面这段 Git Diff 代码变更进行 Review，"
-                        "指出代码的优点，并提出潜在的问题或修改建议，保持专业且简明扼要。"
+                        "你是一个资深的大厂代码审查专家。请仔细阅读以下 Git Diff 代码变更，并使用精美的 Markdown 格式输出结构化的中文 Review 报告。\n\n"
+                        "请严格按以下模板输出：\n"
+                        "### 🌟 变更总结\n"
+                        "- 简要概括此次代码变动的核心目的。\n\n"
+                        "### 🐛 风险与漏洞 (若无请写“未发现显著风险”)\n"
+                        "- 指出可能存在的逻辑漏洞、异常处理缺失或性能隐患。\n\n"
+                        "### 💡 优化建议与代码重构\n"
+                        "- 提供具体的代码改进建议，并使用 Markdown 代码块提供重构后的最佳实践代码。\n"
                     ),
                 },
                 {"role": "user", "content": diff_text},
@@ -98,14 +104,21 @@ if len(diff_text) > max_diff_length:
     print(f"Diff 过长，已截断到 {max_diff_length} 字符以防超载。")
     diff_text = diff_text[:max_diff_length]
 
+
 print("Diff 获取完成，开始 AI 分析...")
 review_result = analyze_code_diff(diff_text)
 if not review_result:
     print("AI 分析失败，程序退出。")
     sys.exit(1)
 
+final_comment = (
+    f"{review_result}\n\n"
+    f"---\n"
+    f"> 🤖 *Powered by [DeepSeek] & GitHub Actions | 全自动代码审查助手*"
+)
+
 print("AI 分析完成，正在发送评论...")
-if post_comment_to_pr(repo, pr_number, review_result):
+if post_comment_to_pr(repo, pr_number, final_comment):
     print("评论发送成功。")
 else:
     print("评论发送失败。")
