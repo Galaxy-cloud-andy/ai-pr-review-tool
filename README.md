@@ -5,7 +5,6 @@
 
 **[👉 🎥 点击此处观看项目完整 Demo 演示视频 (B站) 👈](B站视频链接)**
 
----
 
 ## 📖 项目简介
 本项目是一个基于 Python、GitHub Actions 和 DeepSeek 大模型构建的**全自动代码审查（Code Review）工具**。
@@ -19,6 +18,7 @@
 
 ### 2. 模型选择及原因
 本项目选择 DeepSeek作为核心 AI 引擎。
+ **推理能力极强**：在代码逻辑理解和 Bug 发现方面，DeepSeek 稳居国内大模型第一梯队。
  **极高的性价比**：API 价格极其亲民，适合高频次的 CI/CD 自动化调用。
  **生态兼容性好**：底层 API 完美兼容 OpenAI 标准，降低了接入和后期迁移的开发成本。
 
@@ -31,7 +31,7 @@
 如果你想在自己的 GitHub 仓库中使用本工具，仅需 2 步，**无需在本地运行任何代码**：
 
 1. **复制核心文件**：将本仓库的 `main.py`、`requirements.txt` 以及 `.github/workflows/review.yml` 直接拷贝到您的项目中。
-2. **配置环境变量**：在你仓库的 `Settings` -> `Secrets and variables` -> `Actions` 中，新建一个名为 `OPENAI_API_KEY` 的 Secret，填入你申请的 DeepSeek API Key 即可。
+2. **配置环境变量**：在您仓库的 `Settings` -> `Secrets and variables` -> `Actions` 中，新建一个名为 `OPENAI_API_KEY` 的 Secret，填入您申请的 DeepSeek API Key 即可。
 *(注：GitHub Token 会在运行期自动生成，无需手动配置。)*
 
 ## 🚀 未来扩展方向
@@ -39,4 +39,3 @@
 1. **多语言专属规则检测**：针对 Python、Java、C++ 等不同语言，在 Prompt 中注入不同的静态检查规范（如 PEP8 规范检查）。
 2. **长文本超载处理**：当 PR 变更极大的时候，引入 Token 截断机制或文件分块（Chunking）审查，避免超出大模型的上下文窗口。
 3. **自定义 Prompt 模板**：允许用户在项目根目录放置 `.pr_review_config.yaml` 文件，自定义他们希望 AI 关注的审查重点（比如偏向安全性检查，还是偏向性能优化）。
-
