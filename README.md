@@ -4,6 +4,8 @@
 > 体验方式二： 可以直接 Fork 本仓库并提交一个 PR，机器人将在 1 分钟内自动在评论区回复审查结果。
 
 
+**[👉 🎥 点击此处观看项目完整 Demo 演示视频 (B站) 👈](https://www.bilibili.com/video/BV1j6VS6KEMN/?spm_id_from=333.1387.homepage.video_card.click&vd_source=41173aea8e2c13afb4e5e861b43e8dee)**
+
 
 
 ## 📖 项目简介

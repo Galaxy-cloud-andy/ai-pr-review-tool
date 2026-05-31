@@ -7,7 +7,11 @@ from openai import OpenAI
 # 加载 .env 文件里隐藏的密码
 load_dotenv()
 
-
+def test_func():
+    a = 1
+    b = 2
+    c = a/0
+    return c
 def get_pr_diff(repo: str, pr_number: str):
     api_url = f"https://api.github.com/repos/{repo}/pulls/{pr_number}"
 
